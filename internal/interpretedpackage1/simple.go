@@ -1,4 +1,4 @@
-package interpreted
+package interpretedpackage1
 
 import "fmt"
 
