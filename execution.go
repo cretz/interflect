@@ -6,8 +6,9 @@ import (
 )
 
 type Execution struct {
-	conf  ExecutionConfig
-	coros []*coroutine
+	conf     ExecutionConfig
+	coros    []*coroutine
+	packages map[string]*execPackage
 }
 
 type ExecutionConfig struct {
@@ -44,18 +45,21 @@ func NewExecution(conf ExecutionConfig) (*Execution, error) {
 	if exec.conf.Scheduler == nil {
 		exec.conf.Scheduler = SystemScheduler
 	}
+	// Prepare packages
+	ssaPackages := exec.conf.Program.ssa.AllPackages()
+	exec.packages = make(map[string]*execPackage, len(ssaPackages))
+	for _, ssaPackage := range ssaPackages {
+		exec.packages[ssaPackage.Pkg.Path()] = newExecPackage(exec, ssaPackage)
+	}
 	return exec, nil
 }
 
-func (*Execution) ReflectValue(pkgName, topLevelName string) reflect.Value {
-	panic("TODO")
-}
-
 func (*Execution) ReflectFunc(fn interface{}) reflect.Value {
+	// TODO(cretz): Extract function name and just use ReflectValue
 	panic("TODO")
 }
 
-func (*Execution) ReflectType(pkgName, topLevelName string) reflect.Type {
+func (*Execution) ReflectValue(pkgName, topLevelName string) reflect.Value {
 	panic("TODO")
 }
 
@@ -86,7 +90,12 @@ func (e *Execution) RunOnce() (coroutinesRemain bool) {
 	return len(e.coros) > 0
 }
 
-func (*Execution) ScheduleCall(fn reflect.Value, args []reflect.Value) <-chan []reflect.Value {
+func (*Execution) Go(fn reflect.Value, args []reflect.Value) []reflect.Value {
+	panic("TODO")
+}
+
+func (*Execution) execPackage(path string) *execPackage {
+	// if
 	panic("TODO")
 }
 
@@ -101,3 +110,5 @@ type frame struct {
 func (c *coroutine) runOnce() (wasYielded, alive bool) {
 	panic("TODO")
 }
+
+// func (c *coroutine) call(caller *frame, callPos token.Pos, fn *ssa.Function)

@@ -42,4 +42,5 @@ func (systemCoroutine) Recv(ch reflect.Value) (x reflect.Value, ok bool) {
 	return ch.Recv()
 }
 
+// TODO(cretz): This
 var CooperativeScheduler Scheduler = nil
