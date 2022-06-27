@@ -16,14 +16,18 @@ type emptyInterface struct {
 	word unsafe.Pointer
 }
 
+// LoadTypesOptions are options for LoadTypes.
 type LoadTypesOptions struct {
 }
 
+// Types are types loaded from LoadTypes.
 type Types struct {
 	Named       map[string]map[string]reflect.Type
 	AnonStructs []reflect.Type
 }
 
+// LoadTypes loads all known types from the internal typelinks in the
+// executable.
 func LoadTypes(LoadTypesOptions) (*Types, error) {
 	// Inspired by https://github.com/modern-go/reflect2
 

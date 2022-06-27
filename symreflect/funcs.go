@@ -9,17 +9,22 @@ import (
 )
 
 //go:linkname modulesSlice runtime.modulesSlice
-var modulesSlice *reflect.SliceHeader
+var modulesSlice *interface{}
 
+// LoadFuncsOptions are options for LoadFuncs.
 type LoadFuncsOptions struct {
 	// Required. Can be a LoadTypes()["runtime"]["moduledata"].
 	ModuleDataType reflect.Type
 }
 
+// Funcs is the set of functions returned from LoadFuncs.
 type Funcs struct {
 	Named map[string]map[string]*runtime.Func
 }
 
+// LoadFuncs loads all functions from the function table inside the executable.
+//
+// Note, functions can also be loaded via LoadSymbols.
 func LoadFuncs(options LoadFuncsOptions) (*Funcs, error) {
 	// Inspired by https://github.com/alangpierce/go-forceexport
 
@@ -77,6 +82,9 @@ func LoadFuncs(options LoadFuncsOptions) (*Funcs, error) {
 	return &Funcs{funcs}, nil
 }
 
+// ReflectFunc builds a callable reflect.Value to call the function at the given
+// address. Note, this may not be the equivalent to reflect.ValueOf(funcName)
+// but will reference the same underlying function.
 func ReflectFunc(typ reflect.Type, addr uintptr) reflect.Value {
 	// Inspired by by https://github.com/kstenerud/go-subvert
 	rFunc := reflect.MakeFunc(typ, nil)

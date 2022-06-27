@@ -15,10 +15,15 @@ func init() {
 	getModuleHandle = kernel32.NewProc("GetModuleHandleA")
 }
 
+// LoadSymboles loads all symbols with the given options. If there is no symbol
+// table, this returns ErrNoSymbolTable.
+//
+// Note, in the latest versions of Go, the symbol tables are not present on
+// "go run" or "go test" executables.
 func LoadSymbols(options LoadSymbolsOptions) (*Symbols, error) {
 	// Inspired by Go's nm CLI
 
-	syms := &Symbols{Named: map[string]map[string]Symbol{}}
+	syms := &Symbols{Named: map[string]map[string]*Symbol{}}
 
 	// Set process offset
 	addrRaw, _, _ := getModuleHandle.Call(0)
@@ -65,7 +70,7 @@ func LoadSymbols(options LoadSymbolsOptions) (*Symbols, error) {
 			continue
 		}
 
-		sym := Symbol{PackageName: pkgName, Name: name, Addr: uintptr(s.Value)}
+		sym := &Symbol{PackageName: pkgName, Name: name, Addr: uintptr(s.Value)}
 		switch s.SectionNumber {
 		case N_UNDEF:
 			sym.Type = SymbolTypeUndef
@@ -100,7 +105,7 @@ func LoadSymbols(options LoadSymbolsOptions) (*Symbols, error) {
 		}
 		pkgSyms := syms.Named[pkgName]
 		if pkgSyms == nil {
-			pkgSyms = map[string]Symbol{}
+			pkgSyms = map[string]*Symbol{}
 			syms.Named[pkgName] = pkgSyms
 		}
 		pkgSyms[name] = sym
