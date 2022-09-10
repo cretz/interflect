@@ -34,6 +34,12 @@ type MapIter interface {
 	Next() bool
 }
 
+type PackageReflector interface {
+	ReflectType(pkgName, topLevelName string) reflect.Type
+	// This is a pointer for vars and a pointer to a func for functions
+	ReflectValue(pkgName, topLevelName string) reflect.Value
+}
+
 func NewExecution(conf ExecutionConfig) (*Execution, error) {
 	if conf.Program == nil {
 		return nil, fmt.Errorf("missing program")

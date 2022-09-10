@@ -77,12 +77,14 @@ func NewProgram(config ProgramConfig) (*Program, error) {
 	// TODO(cretz): Accept builder mode via config? Default it to something different?
 	ssaProg := ssa.NewProgram(fset, 0)
 	for pkg, pkgMode := range pkgModes {
+		// Must be properly typed
+		if pkg.Types == nil || pkg.IllTyped {
+			return nil, fmt.Errorf("interpreted package %q is not properly typed", pkg.PkgPath)
+		}
+		// Create SSA package
+		ssaProg.CreatePackage(pkg.Types, pkg.Syntax, pkg.TypesInfo, true)
 		switch pkgMode {
 		case PackageModeInterpreted:
-			// Must be properly typed
-			if pkg.Types == nil || pkg.IllTyped {
-				return nil, fmt.Errorf("interpreted package %q is not properly typed", pkg.PkgPath)
-			}
 			// Do not allow disallowed packages
 			// TODO(cretz): Also disallow import "C" for interpreted packages?
 			for _, depPkg := range pkg.Imports {
@@ -91,8 +93,6 @@ func NewProgram(config ProgramConfig) (*Program, error) {
 						pkg.PkgPath, depPkg.PkgPath)
 				}
 			}
-			// Create SSA package
-			ssaProg.CreatePackage(pkg.Types, pkg.Syntax, pkg.TypesInfo, true)
 		case PackageModeNotInterpreted:
 			// Do not allow interpreted packages to be imported by non-interpreted
 			for _, depPkg := range pkg.Imports {
